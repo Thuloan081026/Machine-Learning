@@ -1,0 +1,75 @@
+{
+    "metadata": {
+        "model_name": "KMeansScratch",
+        "optimal_k": 5,
+        "feature_columns": [
+            "Annual Income (k$)",
+            "Spending Score (1-100)"
+        ],
+        "silhouette_score": 0.5547,
+        "inertia": 65.5684,
+        "scaling_method": "standardization"
+    },
+    "scaler_params": {
+        "method": "standardization",
+        "mean": [
+            60.56,
+            50.2
+        ],
+        "std": [
+            26.19897707926781,
+            25.7588819633151
+        ]
+    },
+    "centroids_scaled": [
+        [
+            0.9915830476839196,
+            1.2395027537948333
+        ],
+        [
+            -1.307518689385044,
+            -1.1369653606646668
+        ],
+        [
+            -1.3295453164960271,
+            1.1321778796599242
+        ],
+        [
+            1.0550030223077875,
+            -1.2844390658272282
+        ],
+        [
+            -0.20091256569971477,
+            -0.026456174707117586
+        ]
+    ],
+    "centroids_raw": [
+        [
+            86.53846153846153,
+            82.12820512820514
+        ],
+        [
+            26.304347826086953,
+            20.913043478260867
+        ],
+        [
+            25.72727272727272,
+            79.36363636363636
+        ],
+        [
+            88.19999999999999,
+            17.114285714285714
+        ],
+        [
+            55.29629629629629,
+            49.51851851851852
+        ]
+    ],
+    "cluster_personas": [
+        "VIP / Big Spenders (Thu nhập cao - Chi tiêu mạnh)",
+        "Sensible / Budget (Thu nhập thấp - Chi tiêu dè dặt)",
+        "Target / Trendsetters (Thu nhập thấp - Chi tiêu phóng khoáng)",
+        "Careful / Savers (Thu nhập cao - Tiết kiệm/Thận trọng)",
+        "Standard / Moderate (Thu nhập & Chi tiêu trung bình)"
+    ]
+}

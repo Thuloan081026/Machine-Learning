@@ -1,0 +1,7 @@
+{
+    "best_k": 5,
+    "inertia": 65.5684,
+    "silhouette_score": 0.5547,
+    "iterations": 4,
+    "converged": true
+}
