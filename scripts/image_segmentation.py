@@ -72,7 +72,7 @@ def run_image_segmentation_pipeline(image_path=None, k_values=[2, 3, 5, 8]):
     plt.tight_layout()
 
     # Luu ket qua truc quan
-    out_dir = ROOT / "outputs" / "figures"
+    out_dir = ROOT / "reports" / "figures"
     rep_dir = ROOT / "reports" / "figures"
     out_dir.mkdir(parents=True, exist_ok=True)
     rep_dir.mkdir(parents=True, exist_ok=True)

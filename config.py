@@ -12,13 +12,15 @@ RAW_DATA_PATH = DATA_DIR / "raw" / "Mall_Customers.csv"
 PROCESSED_DATA_PATH = DATA_DIR / "processed" / "X_scaled.csv"
 EDA_PLOTS_DIR = DATA_DIR / "EDA" / "eda_plots"
 
-# Đường dẫn đầu ra và mô hình
-OUTPUT_DIR = BASE_DIR / "outputs"
-REPORTS_DIR = OUTPUT_DIR / "reports"
-FIGURES_DIR = OUTPUT_DIR / "figures"
-CLUSTERED_DATA_PATH = OUTPUT_DIR / "Mall_Customers_clustered.csv"
+# Đường dẫn báo cáo, biểu đồ và mô hình
+REPORTS_DIR = BASE_DIR / "reports"
+FIGURES_DIR = REPORTS_DIR / "figures"
+CLUSTERED_DATA_PATH = DATA_DIR / "processed" / "Mall_Customers_clustered.csv"
 MODEL_DIR = BASE_DIR / "models"
-MODEL_PATH = MODEL_DIR / "kmeans_model.json"
+SAVE_MODEL_DIR = MODEL_DIR / "save_model"
+MODEL_PATH = SAVE_MODEL_DIR / "kmeans_model.json"
+MODEL_PKL_PATH = SAVE_MODEL_DIR / "kmeans_model.pkl"
+SCALER_PKL_PATH = SAVE_MODEL_DIR / "scaler.pkl"
 
 # Cấu hình đặc trưng
 FEATURE_COLS = ["Annual Income (k$)", "Spending Score (1-100)"]

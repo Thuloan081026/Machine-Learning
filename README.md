@@ -98,8 +98,19 @@ Lab3_KMeans_Clustering/
 │   │   └── X_scaled.csv                  # Ma trận đặc trưng số học đã chuẩn hóa Z-Score
 │   └── EDA/                              # Thư mục chứa biểu đồ phân tích khám phá dữ liệu
 │       └── eda_plots/                    # Biểu đồ phân phối histogram và phân tán ban đầu
-├── models/                               # Lưu trữ mô hình xuất xưởng (Model Artifacts)
-│   └── kmeans_model.json                 # Mô hình K-Means (Centroids, Scaler params, Metadata)
+├── models/                               # Lưu trữ mã nguồn thuật toán và mô hình đã lưu
+│   ├── algorithms/                       # Mã nguồn thuật toán From-Scratch thuần NumPy
+│   │   ├── kmeans.py                     # Thuật toán KMeansScratch (Lloyd + K-Means++)
+│   │   ├── distance.py                   # Ma trận khoảng cách Euclid (Broadcasting)
+│   │   ├── initialization.py             # Khởi tạo tâm K-Means++ và Random
+│   │   ├── metrics.py                    # Đo lường WCSS, Silhouette, Davies-Bouldin
+│   │   └── preprocessing.py              # Bộ chuẩn hóa dữ liệu Scaler
+│   └── save_model/                       # Artifacts xuất xưởng đã lưu (.pkl & .json)
+│       ├── kmeans_model.json             # Model artifact JSON đầy đủ metadata
+│       ├── kmeans_model.pkl              # Mô hình K-Means pickle
+│       └── scaler.pkl                    # Scaler artifact pickle
+├── templates/                            # Giao diện Web tương tác trực quan
+│   └── index.html                        # Giao diện Web Demo Bootstrap / FontAwesome
 ├── notebooks/                            # Sổ tay nghiên cứu trực quan
 │   └── 01_customer_segmentation_kmeans.ipynb # Toàn bộ quy trình EDA, Elbow, Silhouette, Profiling
 ├── outputs/                              # Kết quả đầu ra của pipeline huấn luyện
@@ -206,9 +217,15 @@ python app.py
 ```
 
 2. Máy chủ Flask sẽ khởi chạy tại `http://127.0.0.1:5000/`. Các Endpoints hỗ trợ bao gồm:
-- **`GET /`**: Trang chủ, hiển thị thông tin chung API.
+- **`GET /`**: Trang chủ với giao diện Web Demo đồ họa trực quan (hỗ trợ nhập thu nhập/chi tiêu, thử nhanh kịch bản và xem bảng đối chuẩn phân cụm trực tiếp trên trình duyệt).
 - **`GET /health`**: Kiểm tra trạng thái hoạt động của mô hình (Health Check).
 - **`POST /predict`**: Nhận dữ liệu JSON (Annual_Income, Spending_Score) và trả về Cụm cùng Chân dung Persona.
+
+### D. Kết quả Đánh giá Benchmark Mô hình Phân Cụm:
+
+| Thuật toán | Số cụm (K) | Inertia (WCSS) | Silhouette Score | Davies-Bouldin | Trạng thái |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **KMeansScratch 🏆** | **5** | **65.5684** | **0.5547** | **0.5722** | **Hội tụ (4 vòng lặp)** |
 
 3. Mở một Terminal khác (hoặc dùng Postman), gửi dữ liệu khách hàng vào API để lấy kết quả phân khúc:
 

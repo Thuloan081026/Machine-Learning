@@ -1,5 +1,5 @@
 import os, sys
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8")
@@ -10,17 +10,21 @@ sys.path.insert(0, BASE_DIR)
 import config
 from predict import load_model_artifact, predict_customer_segment
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "templates"))
 _artifact = None
 
 def get_artifact():
     global _artifact
     if _artifact is None:
-        _artifact = load_model_artifact(config.MODEL_PATH)
+        save_path = os.path.join(BASE_DIR, "models", "save_model", "kmeans_model.json")
+        _artifact = load_model_artifact(save_path)
     return _artifact
 
 @app.route("/", methods=["GET"])
 def index():
+    template_path = os.path.join(BASE_DIR, "templates", "index.html")
+    if os.path.exists(template_path):
+        return render_template("index.html")
     return jsonify({
         "project": "Customer Segmentation API (K-Means Clustering From Scratch)",
         "algorithm": "100% NumPy / Pandas (Zero Scikit-Learn)",

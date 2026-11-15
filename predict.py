@@ -18,15 +18,31 @@ if str(PROJECT_ROOT) not in sys.path:
 import numpy as np
 
 import config
-from src.Preprocessing.scaler import Scaler
-from src.training.distance import euclidean_distance
+try:
+    from models.algorithms.preprocessing import Scaler
+    from models.algorithms.distance import euclidean_distance
+except ImportError:
+    from src.Preprocessing.scaler import Scaler
+    from src.training.distance import euclidean_distance
 
 
-def load_model_artifact(model_path: Path) -> dict:
-    """Nạp file JSON chứa tham số mô hình K-Means và Scaler."""
-    if not model_path.exists():
+def load_model_artifact(model_path: Path = None) -> dict:
+    """Nạp file JSON chứa tham số mô hình K-Means và Scaler từ save_model/."""
+    candidates = []
+    if model_path is not None:
+        candidates.append(Path(model_path))
+    candidates.append(config.MODEL_PATH)
+    candidates.append(config.BASE_DIR / "models" / "save_model" / "kmeans_model.json")
+
+    chosen = None
+    for c in candidates:
+        if c.exists():
+            chosen = c
+            break
+
+    if chosen is None:
         raise FileNotFoundError(f"Chưa tìm thấy mô hình tại {model_path}. Hãy chạy python train.py trước!")
-    with open(model_path, "r", encoding="utf-8") as f:
+    with open(chosen, "r", encoding="utf-8") as f:
         artifact = json.load(f)
     return artifact
 

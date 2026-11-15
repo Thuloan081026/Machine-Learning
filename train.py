@@ -19,13 +19,17 @@ import pandas as pd
 import numpy as np
 
 import config
+try:
+    from models.algorithms.preprocessing import Scaler
+    from models.algorithms.kmeans import KMeansScratch
+except ImportError:
+    from src.Preprocessing.scaler import Scaler
+    from src.training.kmeans import KMeansScratch
 from src.EDA.data_loader import load_dataset
 from src.EDA.validation import validate_dataset
 from src.EDA.eda import generate_eda_reports
 from src.Preprocessing.cleaning import clean_customer_data
 from src.Preprocessing.feature_selection import extract_features
-from src.Preprocessing.scaler import Scaler
-from src.training.kmeans import KMeansScratch
 from src.evaluate.metrics import silhouette_score
 from src.evaluate.model_selection import evaluate_k_range
 from src.evaluate.profiling import build_cluster_profiles
@@ -114,8 +118,8 @@ def main():
     )
     print(f"[+] Đã xuất 4 biểu đồ cao cấp vào: {config.FIGURES_DIR}")
 
-    # 8. Đóng gói mô hình JSON Artifact
-    config.MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
+    # 8. Đóng gói mô hình và Scaler Artifact
+    config.SAVE_MODEL_DIR.mkdir(parents=True, exist_ok=True)
     model_artifact = {
         "metadata": {
             "model_name": "KMeansScratch",
@@ -130,9 +134,14 @@ def main():
         "centroids_raw": centroids_raw.tolist(),
         "cluster_personas": df_profile["Persona"].tolist()
     }
+    # Lưu JSON Artifact vào save_model/
     with open(config.MODEL_PATH, "w", encoding="utf-8") as f:
         json.dump(model_artifact, f, indent=4, ensure_ascii=False)
-    print(f"[+] Đã lưu mô hình JSON xuất xưởng: {config.MODEL_PATH.name}")
+
+    # Lưu Pickle Artifacts (.pkl) tương đồng kiến trúc Lab 2
+    model.save(str(config.MODEL_PKL_PATH))
+    scaler.save(str(config.SCALER_PKL_PATH))
+    print(f"[+] Đã lưu mô hình và Scaler vào: {config.SAVE_MODEL_DIR}")
 
     rep_dir = config.BASE_DIR / "reports"
     rep_dir.mkdir(parents=True, exist_ok=True)

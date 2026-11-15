@@ -1,4 +1,15 @@
-# CÁC THUẬT TOÁN — LAB 3: K-MEANS CLUSTERING & IMAGE SEGMENTATION
+# Thuật toán — Lab 3: K-Means Clustering & Customer Segmentation
+
+- **KMeansScratch:** Thuật toán phân cụm K-Means thuần NumPy với K-Means++ và xử lý cụm rỗng.
+- **Khoảng cách ma trận hóa:** Tối ưu hóa 3D Broadcasting cho khoảng cách Euclid và Manhattan.
+- **Scaler:** Chuẩn hóa dữ liệu theo Standardization và MinMax.
+- **Đo lường chất lượng phân cụm:** WCSS (Inertia), Silhouette Score, Davies-Bouldin Index.
+- **Lượng tử hóa màu ảnh:** Phân vùng ảnh (Color Quantization) trong không gian màu 3D RGB.
+
+Các thuật toán cốt lõi được viết 100% bằng NumPy và Pandas, không dùng scikit-learn.
+
+Mã nguồn thuật toán nằm trong `models/algorithms/`; các model đã huấn luyện được lưu trong `models/save_model/`.
+
 ---
 
 ## 1. TÍNH TOÁN KHOẢNG CÁCH EUCLID MA TRẬN HÓA (VECTORIZED DISTANCE)

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 3: Phân Khúc Khách Hàng (K-Means Clustering)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 30px 15px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        .main-card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            background: #ffffff;
+        }
+        .header-box {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: #fff;
+            padding: 24px;
+            border-radius: 16px 16px 0 0;
+        }
+        .preset-btn {
+            font-size: 0.85rem;
+            margin-right: 6px;
+            margin-bottom: 6px;
+        }
+        .result-card {
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            background: #f0fdf4;
+            border: 2px solid #22c55e;
+            transition: all 0.2s ease;
+        }
+        .persona-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .cluster-badge {
+            font-size: 1.1rem;
+            padding: 6px 16px;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container" style="max-width: 960px;">
+    <div class="card main-card">
+        <div class="header-box">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="mb-1"><i class="fa-solid fa-users-viewfinder me-2"></i>Lab 3: Phân Khúc Khách Hàng (Customer Segmentation)</h3>
+                    <p class="mb-0 opacity-90">Mô hình phân cụm K-Means Scratch 100% NumPy (K-Means++, WCSS & Silhouette Score)</p>
+                </div>
+                <span class="badge bg-light text-dark px-3 py-2"><i class="fa-solid fa-circle text-success me-1"></i>API Active</span>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+            <!-- Preset Selection -->
+            <div class="mb-4">
+                <label class="form-label fw-bold text-muted text-uppercase" style="font-size: 0.8rem;">
+                    <i class="fa-solid fa-wand-magic-sparkles me-1"></i>Kịch bản khách hàng mẫu thử nhanh:
+                </label>
+                <div>
+                    <button class="btn btn-outline-success preset-btn" onclick="selectPreset(90, 85)">
+                        👑 Khách VIP (90k$, Chi tiêu 85)
+                    </button>
+                    <button class="btn btn-outline-warning text-dark preset-btn" onclick="selectPreset(95, 15)">
+                        💰 Khách Tiết Kiệm (95k$, Chi tiêu 15)
+                    </button>
+                    <button class="btn btn-outline-primary preset-btn" onclick="selectPreset(25, 80)">
+                        🛍️ Trendsetter / Trẻ tuổi (25k$, Chi tiêu 80)
+                    </button>
+                    <button class="btn btn-outline-info text-dark preset-btn" onclick="selectPreset(55, 50)">
+                        ⚖️ Trung Lưu / Tiêu Chuẩn (55k$, Chi tiêu 50)
+                    </button>
+                    <button class="btn btn-outline-secondary preset-btn" onclick="selectPreset(20, 20)">
+                        🛡️ Dè Dặt / Hạn Hẹp (20k$, Chi tiêu 20)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Input Form -->
+            <form id="clusterForm">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-5">
+                        <label class="form-label fw-semibold">Thu nhập hàng năm (Annual Income k$):</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="incomeInput" min="10" max="200" step="1" value="90" required>
+                            <span class="input-group-text">k$ / năm</span>
+                        </div>
+                        <small class="text-muted">Khoảng phổ biến: 15k$ - 140k$</small>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label fw-semibold">Điểm chi tiêu mua sắm (Spending Score 1-100):</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="spendingInput" min="1" max="100" step="1" value="85" required>
+                            <span class="input-group-text">/ 100</span>
+                        </div>
+                        <small class="text-muted">Chỉ số hành vi chi tiêu thực tế của khách hàng</small>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-success w-100 py-2 fw-semibold">
+                            <i class="fa-solid fa-bullseye me-1"></i>Phân Cụm
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Results Section -->
+            <div id="resultSection" style="display: none;" class="mb-4">
+                <h5 class="fw-bold mb-3"><i class="fa-solid fa-address-card me-2"></i>Kết Quả Phân Cụm & Nhận Diện Chân Dung Khách Hàng</h5>
+                <div class="result-card">
+                    <div class="d-flex justify-content-center align-items-center mb-2">
+                        <span id="clusterBadge" class="badge bg-success cluster-badge me-2">Cụm 0</span>
+                        <span id="distanceBadge" class="badge bg-light text-muted border">Khoảng cách tới tâm: 0.15</span>
+                    </div>
+                    <div id="personaName" class="persona-title text-success mb-2">Khách Hàng VIP / Tiềm Năng Cao</div>
+                    <p id="personaDesc" class="text-muted mb-0" style="max-width: 650px; margin: 0 auto;">
+                        Thu nhập rất cao và mức độ chi tiêu rất mạnh tay. Đây là nhóm khách hàng mang lại biên lợi nhuận lớn nhất cho trung tâm thương mại.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Benchmark Reference Table -->
+            <div class="mt-4 pt-3 border-top">
+                <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size: 0.82rem;">
+                    <i class="fa-solid fa-table-list me-1"></i>Bảng đối chuẩn chất lượng mô hình K-Means Scratch (K=5):
+                </h6>
+                <div class="row g-3 mb-3 text-center">
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3">
+                            <div class="text-muted small fw-semibold">Số Cụm Tối Ưu (K)</div>
+                            <div class="fs-4 fw-bold text-success">5 Cụm</div>
+                            <small class="text-muted">Xác định qua Elbow & Silhouette</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3">
+                            <div class="text-muted small fw-semibold">Inertia (WCSS)</div>
+                            <div class="fs-4 fw-bold text-primary">65.57</div>
+                            <small class="text-muted">Độ phân tán nội cụm tối ưu</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3">
+                            <div class="text-muted small fw-semibold">Silhouette Score</div>
+                            <div class="fs-4 fw-bold text-dark">0.5547</div>
+                            <small class="text-muted">Độ gắn kết và tách biệt cụm cao</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm text-center align-middle" style="font-size: 0.85rem;">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Cụm</th>
+                                <th>Thu nhập TB (k$)</th>
+                                <th>Chi tiêu TB (1-100)</th>
+                                <th>Số lượng</th>
+                                <th>Tỷ lệ (%)</th>
+                                <th>Chân dung Persona</th>
+                                <th>Đặc điểm hành vi & Chiến lược</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="badge bg-success">Cụm 0</span></td>
+                                <td>86.5 k$</td>
+                                <td>82.1 / 100</td>
+                                <td>39</td>
+                                <td>19.5%</td>
+                                <td class="fw-bold text-success">VIP / Tiêu dùng bạo</td>
+                                <td class="text-start small">Thu nhập cao, chi tiêu mạnh -> Ưu đãi độc quyền, dịch vụ cao cấp</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-secondary">Cụm 1</span></td>
+                                <td>26.3 k$</td>
+                                <td>20.9 / 100</td>
+                                <td>23</td>
+                                <td>11.5%</td>
+                                <td class="fw-bold text-secondary">Dè dặt / Hạn hẹp</td>
+                                <td class="text-start small">Thu nhập thấp, chi tiêu thấp -> Hàng giảm giá, sản phẩm thiết yếu</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-primary">Cụm 2</span></td>
+                                <td>25.7 k$</td>
+                                <td>79.4 / 100</td>
+                                <td>22</td>
+                                <td>11.0%</td>
+                                <td class="fw-bold text-primary">Giới trẻ / Trendsetter</td>
+                                <td class="text-start small">Thu nhập thấp nhưng chi tiêu bạo -> Bắt trend, flash sale, mua sắm giải trí</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-warning text-dark">Cụm 3</span></td>
+                                <td>88.2 k$</td>
+                                <td>17.1 / 100</td>
+                                <td>35</td>
+                                <td>17.5%</td>
+                                <td class="fw-bold text-warning text-dark">Tiết kiệm / Cẩn trọng</td>
+                                <td class="text-start small">Thu nhập cao nhưng chi tiêu ít -> Đánh vào chất lượng, đầu tư, tích điểm dài hạn</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-info text-dark">Cụm 4</span></td>
+                                <td>55.3 k$</td>
+                                <td>49.5 / 100</td>
+                                <td>81</td>
+                                <td>40.5%</td>
+                                <td class="fw-bold text-info text-dark">Trung lưu / Tiêu chuẩn</td>
+                                <td class="text-start small">Chiếm đa số khách hàng -> Các chương trình khách hàng thân thiết định kỳ</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="small text-muted mt-2">
+                    <i class="fa-solid fa-circle-info me-1"></i><strong>Quy chuẩn:</strong> Thuật toán K-Means, K-Means++ Initialization, khoảng cách ma trận hóa Broadcasting và chuẩn hóa StandardScaler được cài đặt 100% From-Scratch thuần NumPy/Pandas.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const personaMap = {
+    0: {
+        title: "Khách Hàng VIP / Tiềm Năng Lớn (Cụm 0)",
+        color: "text-success",
+        badge: "bg-success",
+        desc: "Thu nhập cao và chi tiêu mạnh tay. Nhóm khách hàng quan trọng nhất mang lại biên lợi nhuận lớn. Khuyến nghị: Ưu đãi độc quyền, dịch vụ CSKH VIP, sản phẩm cao cấp."
+    },
+    1: {
+        title: "Khách Hàng Dè Dặt / Hạn Hẹp (Cụm 1)",
+        color: "text-secondary",
+        badge: "bg-secondary",
+        desc: "Thu nhập thấp và mức chi tiêu thấp. Khách hàng nhạy cảm về giá và cân nhắc kỹ lưỡng. Khuyến nghị: Mã giảm giá sâu, combo tiết kiệm, mặt hàng thiết yếu."
+    },
+    2: {
+        title: "Khách Hàng Giới Trẻ / Trendsetter (Cụm 2)",
+        color: "text-primary",
+        badge: "bg-primary",
+        desc: "Thu nhập thấp/vừa nhưng mức độ chi tiêu rất cao, thích xu hướng mới. Khuyến nghị: Chiến dịch Social Media Marketing, hàng trendy, chương trình mua trước trả sau (BNPL)."
+    },
+    3: {
+        title: "Khách Hàng Tiết Kiệm / Cẩn Trọng (Cụm 3)",
+        color: "text-warning",
+        badge: "bg-warning text-dark",
+        desc: "Thu nhập rất cao nhưng chi tiêu dè sẻn. Khách hàng chuộng giá trị bền vững và tính hợp lý. Khuyến nghị: Tiếp thị chất lượng sản phẩm, chế độ bảo hành vượt trội, tích điểm lâu dài."
+    },
+    4: {
+        title: "Khách Hàng Trung Lưu / Tiêu Chuẩn (Cụm 4)",
+        color: "text-info",
+        badge: "bg-info text-dark",
+        desc: "Thu nhập và chi tiêu ở mức trung bình ổn định, chiếm tỉ trọng đông nhất (40.5%). Khuyến nghị: Chương trình tích điểm thành viên, thẻ khách hàng thân thiết, khuyến mãi cuối tuần."
+    }
+};
+
+function selectPreset(income, spending) {
+    document.getElementById('incomeInput').value = income;
+    document.getElementById('spendingInput').value = spending;
+    document.getElementById('clusterForm').dispatchEvent(new Event('submit'));
+}
+
+document.getElementById('clusterForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const income = parseFloat(document.getElementById('incomeInput').value);
+    const spending = parseFloat(document.getElementById('spendingInput').value);
+
+    try {
+        const res = await fetch('/predict', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({Annual_Income: income, Spending_Score: spending})
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+            const cluster = data.cluster;
+            const info = personaMap[cluster] || {
+                title: data.persona || `Cụm ${cluster}`,
+                color: "text-dark",
+                badge: "bg-dark",
+                desc: "Thông tin chân dung khách hàng."
+            };
+
+            document.getElementById('clusterBadge').className = `badge ${info.badge} cluster-badge me-2`;
+            document.getElementById('clusterBadge').innerText = `Cụm ${cluster}`;
+            document.getElementById('distanceBadge').innerText = `Khoảng cách tới tâm: ${data.distance_to_centroid.toFixed(4)}`;
+            document.getElementById('personaName').className = `persona-title ${info.color} mb-2`;
+            document.getElementById('personaName').innerText = info.title;
+            document.getElementById('personaDesc').innerText = info.desc;
+
+            document.getElementById('resultSection').style.display = 'block';
+            document.getElementById('resultSection').scrollIntoView({behavior: 'smooth', block: 'nearest'});
+        } else {
+            alert("Lỗi: " + (data.message || data.error));
+        }
+    } catch (err) {
+        alert("Lỗi kết nối API: " + err.message);
+    }
+});
+</script>
+</body>
+</html>
